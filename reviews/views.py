@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.shortcuts import render
 
 from .models import Review
@@ -9,5 +10,8 @@ def review_list(request):
 
 
 def review_detail(request, id):
-    review = Review.published.get(id=id)
+    try:
+        review = Review.published.get(id=id)
+    except Review.DoesNotExist:
+        raise Http404("Review Not Found")
     return render(request, "reviews/detail.html", {"review": review})
