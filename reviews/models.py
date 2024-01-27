@@ -1,7 +1,13 @@
 from django.contrib.auth.models import User
 from django.contrib.gis.measure import D
 from django.db import models
+from django.db.models.query import QuerySet
 from django.utils import timezone
+
+
+class PublishedManager(models.Manager):
+    def get_queryset(self) -> QuerySet:
+        return super().get_queryset().filter(status=Review.Status.PUBLISHED)
 
 
 class Review(models.Model):
@@ -16,6 +22,9 @@ class Review(models.Model):
         GOOD = (3, "3 - Good")
         EXCELLENT = (4, "4 - Excellent")
         EXCEPTIONAL = (5, "5 - Exceptional")
+
+    objects = models.Manager()
+    published = PublishedManager()
 
     title = models.CharField(max_length=200)
     status = models.IntegerField(choices=Status.choices, default=Status.DRAFT)
