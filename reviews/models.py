@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-from django.contrib.gis.measure import D
 from django.db import models
 from django.db.models.query import QuerySet
 from django.utils import timezone
@@ -26,6 +25,7 @@ class Review(models.Model):
     objects = models.Manager()
     published = PublishedManager()
 
+    id: int
     title = models.CharField(max_length=200)
     status = models.IntegerField(choices=Status.choices, default=Status.DRAFT)
     body = models.TextField()
@@ -35,6 +35,10 @@ class Review(models.Model):
     published_at = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse("reviews:review_detail", args=[self.id])
 
     def __str__(self) -> str:
         return f"{self.title} - {self.status}"
