@@ -27,6 +27,7 @@ class Review(models.Model):
 
     id: int
     title = models.CharField(max_length=200)
+    slugified_title = models.SlugField(max_length=200, unique_for_date="published_at")
     status = models.IntegerField(choices=Status.choices, default=Status.DRAFT)
     body = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -38,7 +39,11 @@ class Review(models.Model):
 
     def get_absolute_url(self):
         from django.urls import reverse
-        return reverse("reviews:review_detail", args=[self.id])
+
+        return reverse(
+            "reviews:review_detail",
+            args=[self.published_at.year, self.published_at.month, self.published_at.day, self.slugified_title],
+        )
 
     def __str__(self) -> str:
         return f"{self.title} - {self.status}"
