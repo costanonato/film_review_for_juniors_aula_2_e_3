@@ -1,8 +1,10 @@
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import HttpRequest
+from django.views.decorators.http import require_POST
 
-from .models import Review
+from .forms import CommentForm
+from .models import Comment, Review
 
 
 def review_list(request: HttpRequest):
@@ -19,6 +21,7 @@ def review_list(request: HttpRequest):
 
 
 def review_detail(request, year, month, day, slugified_title):
+    form = CommentForm()
     review = get_object_or_404(
         Review.published,
         published_at__year=year,
@@ -26,4 +29,18 @@ def review_detail(request, year, month, day, slugified_title):
         published_at__day=day,
         slugified_title=slugified_title,
     )
-    return render(request, "reviews/detail.html", {"review": review})
+    return render(request, "reviews/detail.html", {"review": review, "form": form})
+
+
+@require_POST
+def add_comment(request: HttpRequest, review_id):
+    review: Review = get_object_or_404(Review.published, id=review_id)
+    form = CommentForm(request.POST)
+
+    if form.is_valid():
+        comment = Comment(**form.cleaned_data)
+        comment.review = review
+        comment.save()
+        return HttpResponseRedirect(review.get_absolute_url())
+    else:
+        return render(request, "reviews/detail.html", {"review": review, "form": form})
