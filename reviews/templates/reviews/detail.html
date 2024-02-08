@@ -34,6 +34,24 @@
 
         <hr />
 
+        {% with comments_total=comments.count %}
+          <h4 class="mb-3">{{ comments_total }} Comment{{ comments_total|pluralize }}: </h4>
+        {% endwith %}
+
+        {% for comment in comments %}
+          <div class="card mb-4 col-md-6">
+            <div class="card-body">
+              <blockquote class="blockquote mb-0">
+                <p>Comment #{{ forloop.counter }}</p>
+                <p>{{ comment.message }}</p>
+                <footer class="blockquote-footer">{{ comment.user_name }} <cite title="Source Title"> - {{ comment.created_at }}</cite></footer>
+              </blockquote>
+            </div>
+          </div>
+        {% empty %}
+          <h4>There is no comment</h4>
+        {% endfor %}
+
         {% include 'reviews/includes/comment_form.html' %}
       </div>
     </div>

@@ -23,20 +23,22 @@ def review_list(request: HttpRequest):
 
 def review_detail(request, year, month, day, slugified_title):
     form = CommentForm()
-    review = get_object_or_404(
+    review: Review = get_object_or_404(
         Review.published,
         published_at__year=year,
         published_at__month=month,
         published_at__day=day,
         slugified_title=slugified_title,
     )
-    return render(request, "reviews/detail.html", {"review": review, "form": form})
+    comments = review.comments.filter(active=True)
+    return render(request, "reviews/detail.html", {"review": review, "form": form, "comments": comments})
 
 
 @require_POST
 def add_comment(request: HttpRequest, review_id):
     review: Review = get_object_or_404(Review.published, id=review_id)
     form = CommentForm(data=request.POST)
+    comments = review.comments.filter(active=True)
 
     if form.is_valid():
         comment: Comment = form.save(commit=False)
@@ -45,4 +47,4 @@ def add_comment(request: HttpRequest, review_id):
         messages.success(request, "Your comment was added successfully!")
         return redirect(review)
     else:
-        return render(request, "reviews/detail.html", {"review": review, "form": form})
+        return render(request, "reviews/detail.html", {"review": review, "form": form, "comments": comments})

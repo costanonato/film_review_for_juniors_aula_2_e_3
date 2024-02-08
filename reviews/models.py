@@ -32,6 +32,7 @@ class Review(models.Model):
     body = models.TextField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.IntegerField(choices=RatingChoices.choices, default=RatingChoices.GOOD)
+    comments: models.Manager["Comment"]
 
     published_at = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(auto_now_add=True)
